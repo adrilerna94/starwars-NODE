@@ -1,4 +1,3 @@
-# starwars-NODE
 # Ejercicio Cache de StarWars
 
 ## API Endpoints
