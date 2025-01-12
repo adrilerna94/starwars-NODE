@@ -1,7 +1,6 @@
 import Joi from "joi";
 
-const starwarsRequestSchema = Joi.object({
-  uid: Joi.number().min(1).max(83).required(),
+const starwarsReqQuerySchema = Joi.object({
   force: Joi.bool().optional(), // parametro opcional. si existe deber ser true or false
   page: Joi.number().integer().optional(),
   limit: Joi.number().integer().optional(),
@@ -22,4 +21,8 @@ const starwarsRequestSchema = Joi.object({
   return value; // si la validación es correcta, retornar el valor sin cambios
 });
 
-export { starwarsRequestSchema };
+const starwarsUidSchema = Joi.object({
+  uid: Joi.number().min(1).max(83).required()
+})
+
+export { starwarsReqQuerySchema, starwarsUidSchema };
