@@ -20,7 +20,7 @@ import { StarWars } from "../api/interfaces/starwars.interface";
 declare global {
   var cache: {
     // la clave siempre será uid
-    [uid: number]: { data: StarWars, expiration: number } // expiratoin: number para trabajar con milisegundos ➡️ 1000 ms = 1s
+    [uid: string]: { data: StarWars, expiration: number } // expiratoin: 300.000 ms es igual a 5 minutos
   }
 }
 
