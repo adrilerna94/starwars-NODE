@@ -16,7 +16,10 @@ export const getPeopleWithPagination = async (req: Request, res: Response) => {
   const paginationKey = `page-${pageNumber}-limit-${limitNumber}`;
 
   // Verificamos si los datos están en caché y son válidos
-  if (global.cache[paginationKey] && isCacheValid(paginationKey)) {
+  if (cacheExists(paginationKey)) {
+    if (!isCacheValid(paginationKey)) {
+      delete global.cache[paginationKey];
+    }
     return res.json(global.cache[paginationKey].data);
   }
 
@@ -69,9 +72,13 @@ async function getCachedData(uid: string, force: boolean) {
   // verificamos si hay datos en cache y si no han expirado
   if (global.cache[uid]) {
     const { data, expiration } = global.cache[uid];
-    if (currentTime < expiration) {
-      return data; // si cache es válido devolvemos datos
+
+    // verificar si ha expirado
+    if (currentTime > expiration) {
+      delete global.cache[uid];
+      return null;
     }
+    return data; // si cache es válido devolvemos datos
   }
   // si no tenemos datos en la cache o el cache ha expirado, hacemos la solicitud
   return await fetchPeopleFromApi(uid);
@@ -115,10 +122,17 @@ const savePeopleInCache = (uid: string, data: StarWars, timestamp: number) => {
 };
 
 // Función para verificar si la caché es válida (dentro de los últimos 5 minutos)
-function isCacheValid(key: string): boolean {
+function cacheExists(key: string): boolean {
   const cacheEntry = global.cache[key];
-  const currentTime = new Date().getTime();
 
-  // Verificamos si la caché existe y si el tiempo de expiración no ha pasado
-  return cacheEntry && currentTime < cacheEntry.expiration;
+  // Verificamos si la caché existe
+  return cacheEntry ? true: false;
+}
+
+function isCacheValid (key:string): boolean {
+  const cacheEntry = global.cache[key];
+  const currentTime= new Date().getTime();
+
+  // verificamos que el tiempo de expiration (tiempo actual + 5 min) sea mayor al tiempo actual
+  return currentTime < cacheEntry.expiration;
 }
