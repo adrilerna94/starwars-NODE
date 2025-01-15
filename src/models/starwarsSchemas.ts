@@ -1,7 +1,10 @@
-import Joi from "joi";
-
+import Joi from 'joi';
+/*
+  force: Joi.bool().optional() ➡️ ESTRICTO 🟰 Solo válido si query param fuera boolean. al ser siempre string "true" OR "false" no funcionará
+  force: Joi.boolean().truthy('true', '1').falsy('false', '0').optional(),
+  */
 const starwarsReqQuerySchema = Joi.object({
-  force: Joi.bool().optional(), // parametro opcional. si existe deber ser true or false
+  force: Joi.boolean().truthy('true').falsy('false').optional(),
   page: Joi.number().integer().optional(),
   limit: Joi.number().integer().optional(),
   maxValue: Joi.number().valid(83).required(), // valor máximo de people
