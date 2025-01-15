@@ -19,7 +19,7 @@ export interface StarWars {
   },
   description: string,
   _id: string,
-  uid: number,
+  uid: string,
   _v: number // versión del documento, allways a numner
 
   }
