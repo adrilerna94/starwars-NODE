@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getPeopleByNumber} from '../controllers/starWarsController';
-import {getPeopleWithPagination } from '../controllers/starWarsNewController';
+// import { getPeopleByNumber} from '../controllers/starWarsController';
+import {getPeopleWithPagination, getPeopleByNumber} from '../controllers/starWarsController';
 import { validateRequest } from '../middlewares/starWarsRequestValidation';
 import { starwarsReqQuerySchema, starwarsUidSchema } from '../../models/starwarsSchemas';
 

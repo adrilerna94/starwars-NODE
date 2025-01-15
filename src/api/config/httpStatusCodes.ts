@@ -6,6 +6,6 @@ const httpStatus = {
   notFound: 404,
   internalServerError: 500,
   unauthorized: 401,
-};
+} as const; // as const inmutable
 
 export default httpStatus;
