@@ -1,3 +1,4 @@
+
 /* eslint-disable no-var */
 
 // Archivo de declaración de tipos
