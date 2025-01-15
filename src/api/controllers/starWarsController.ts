@@ -18,12 +18,13 @@ export const getPeopleByNumber =  async (req: Request, res: Response) => {
   return res.status(200).json({
     status: 'Success',
     character: data.result.properties.name,
-    data
+    data,
   });
 }
 
 async function getData (uid:string) {
   try {
+    const timestamp = new Date();
     const result = await axios.get(`${url}${uid}`, {timeout: 5000}); // esperamos a que la solicitud se complete
     const character = result.data;
 
@@ -32,7 +33,7 @@ async function getData (uid:string) {
       console.log('Data not found');
       return null; // Si no se encuentra el personaje, retornamos null
     }
-    return character;
+    return {...character, timestamp};
   } catch (error) {
     console.error('Error fetching data from API:', error);
     return null; // Si hay un error al hacer la solicitud, retornamos null
