@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import type Joi from 'joi';
-import { ParsedQs }from 'qs';
+import { ParsedQs } from 'qs';
 
 const validateRequest = <ReqParams, ReqQuery = ParsedQs>(schema: Joi.ObjectSchema, reqType: 'params' | 'query') => {
 
