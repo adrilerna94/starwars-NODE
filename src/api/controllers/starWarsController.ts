@@ -6,32 +6,50 @@ import { StarWarsPagination } from "../interfaces/starwarsPagination.interface";
 const url = "https://www.swapi.tech/api/people/";
 const EXPIRATION_TIME = 300_000; // 5 minutos
 
+/*
+  📌 ¿Por qué ahora funciona? ➡️ **as string** 📌
+  - ➡️ `as string` le indica a TypeScript que trate `page` y `limit` como **cadenas de texto**.
+  - ➡️ Forzar el tipo: Cambia el tipo de `page` y `limit` de tipos más amplios (`string[]`, `undefined`) a **`string`**.
+  - ➡️ Eliminación de errores de tipo: Después de la conversión explícita, **TypeScript ya no lanza errores** al usar `page` y `limit` en funciones como `savePaginationInCache`.
+
+  🔍 ➡️ **Puntos importantes** 🔍
+  - ➡️ Si `page` o `limit` son **`undefined`**, el código podría seguir funcionando incorrectamente.
+  - ➡️ Asegúrate de **asignar un valor predeterminado** si `page` o `limit` son `undefined`, para evitar pasar valores no válidos.
+
+  🛠️ ➡️ **Solución sugerida**:
+  - ➡️ Asigna un valor predeterminado a `page` y `limit` si son `undefined`:
+    ```typescript
+    const page = req.query.page ? (req.query.page as string) : '1'; // Default to '1' if undefined
+    const limit = req.query.limit ? (req.query.limit as string) : '10'; // Default to '10' if undefined
+    ```
+
+  ✔️ ➡️ **Resultado**: Ahora el código funciona correctamente sin errores de tipo y con valores predeterminados si es necesario.
+*/
+
+
 // Controlador para la ruta /people con paginación
 export const getPeopleWithPagination = async (req: Request, res: Response) => {
   const { page, limit } = req.query;
-
-  const pageNumber = parseInt(page as string);
-  const limitNumber = parseInt(limit as string);
-
-  const paginationKey = `page-${pageNumber}-limit-${limitNumber}`;
+  const paginationKey = `page-${page}-limit-${limit}`;
 
   // Verificamos si los datos están en caché y son válidos
   if (cacheExists(paginationKey)) {
     if (!isCacheValid(paginationKey)) {
       delete global.cache[paginationKey];
+    } else {
+      return res.json(global.cache[paginationKey].data);
     }
-    return res.json(global.cache[paginationKey].data);
   }
 
   try {
     const response = await axios.get(url, {
-      params: { page: pageNumber, limit: limitNumber },
+      params: { page, limit },
     });
 
     const timestamp = new Date().getTime();
 
     // Almacenamos los datos en caché
-    savePaginationInCache(pageNumber.toString(), limitNumber.toString(), response.data, timestamp);
+    savePaginationInCache(page as string, limit as string, response.data, timestamp);
 
     return res.json(response.data);
   } catch (error) {
@@ -64,25 +82,21 @@ export const getPeopleByNumber = async (req: Request, res: Response) => {
 
 // Función para verificar y obtener datos de la caché o hacer una nueva solicitud
 async function getCachedData(uid: string, force: boolean) {
-  const currentTime = new Date().getTime(); // time in ms
-  if (force) {
+
+  // Si la caché no existe, ha expirado o se requiere forzar una actualización (force)
+  if (!cacheExists(uid) || !isCacheValid(uid) || force) {
+    // Si la caché no es válida o se requiere una actualización forzada, eliminamos la caché expirado
+    if (cacheExists(uid) && !isCacheValid(uid)) {
+      delete global.cache[uid]; // Limpiar caché expirado
+    }
+    // Hacemos una solicitud a la API para obtener los datos actualizados
     return await fetchPeopleFromApi(uid);
   }
 
-  // verificamos si hay datos en cache y si no han expirado
-  if (global.cache[uid]) {
-    const { data, expiration } = global.cache[uid];
-
-    // verificar si ha expirado
-    if (currentTime > expiration) {
-      delete global.cache[uid];
-      return null;
-    }
-    return data; // si cache es válido devolvemos datos
-  }
-  // si no tenemos datos en la cache o el cache ha expirado, hacemos la solicitud
-  return await fetchPeopleFromApi(uid);
+  // Si la caché es válida, retornamos los datos
+  return global.cache[uid].data;
 }
+
 
 // Función para obtener los datos de la API
 async function fetchPeopleFromApi(uid: string) {
