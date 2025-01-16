@@ -5,7 +5,16 @@ const starwarsReqQuerySchema = Joi.object({
   page: Joi.number().integer().optional(),
   limit: Joi.number().integer().optional(),
 })
-.with('page', 'limit')
+
+/* .and('property1', 'property2')
+  Comportamiento:
+  1) Si ambos campos están presentes: La validación pasará sin problemas.
+  2) Si solo uno de los campos está presente (por ejemplo, solo page o solo limit): Se generará un error, ya que ambos deben estar presentes si uno lo está.
+  3) Si ninguno de los campos está presente: No se generará error, ya que ambos campos son opcionales.
+
+*/
+.and('page', 'limit')
+// si existe page tambien limit ➡️ .with('page', 'limit')
 .custom((value, helper) => {
 
 // Verificamos que 'page' y 'limit' estén definidos
